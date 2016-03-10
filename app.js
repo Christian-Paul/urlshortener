@@ -43,8 +43,11 @@ app.get('/new/*', function(req, res) {
             }
         });
 
-
-        res.json({ longurl: longurl, shorturl: req.hostname + ':' + port + '/' + count });
+        // for development on localhost:port
+        //res.json({ longurl: longurl, shorturl: req.hostname + ':' + port + '/' + count });
+        
+        // for deployment
+        res.json({ longurl: longurl, shorturl: req.hostname + '/' + count });
         
     });
 });
