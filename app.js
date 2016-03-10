@@ -16,33 +16,37 @@ var Url = mongoose.model('Url', urlSchema);
 
 var port = process.env.PORT || 3000;
 
-var count = 0;
-
 app.get('/new/*', function(req, res) {
     
-    var longurl = req.originalUrl.split('/new/')[1];
-    count++;
-    
-    /*longurl doesn't have 'http://www.*.*' || 'https://www.*.*')*/
-    if(false) {
-        res.json({ error: 'improper url format' });
-    }
-    
-    var newurl = new Url({
-        id: count,
-        longurl: longurl
-    });
+    Url.count({}, function(err, item) {
+        var count = item;
+        console.log(count + ' items inside');
+        
+        var longurl = req.originalUrl.split('/new/')[1];
 
-    newurl.save(function(err) {
-        if(err) {
-            console.log('error');
+        /*longurl doesn't have 'http://www.*.*' || 'https://www.*.*')*/
+        if(false) {
+            res.json({ error: 'improper url format' });
         }
-        else {
-            console.log('success!')
-        }
+
+        var newurl = new Url({
+            id: count,
+            longurl: longurl
+        });
+
+        newurl.save(function(err) {
+            if(err) {
+                console.log('error');
+            }
+            else {
+                console.log('success!');
+            }
+        });
+
+
+        res.json({ longurl: longurl, shorturl: req.hostname + ':' + port + '/' + count });
+        
     });
-    
-    res.json({ longurl: longurl, shorturl: req.hostname + ':' + port + '/' + count });
 });
 
 app.get('/:id', function(req, res) {
