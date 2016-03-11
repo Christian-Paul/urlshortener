@@ -16,40 +16,44 @@ var Url = mongoose.model('Url', urlSchema);
 
 var port = process.env.PORT || 3000;
 
+var valid = /^(ftp|http|https):\/\/[^ "]+$/;
+
 app.get('/new/*', function(req, res) {
     
-    Url.count({}, function(err, item) {
-        var count = item;
-        console.log(count + ' items inside');
-        
-        var longurl = req.originalUrl.split('/new/')[1];
+    var longurl = req.originalUrl.split('/new/')[1];
 
-        /*longurl doesn't have 'http://www.*.*' || 'https://www.*.*')*/
-        if(false) {
-            res.json({ error: 'improper url format' });
-        }
+    /*longurl doesn't have 'http://www.*.*' || 'https://www.*.*')*/
+    if(!valid.test(longurl)) {
+        res.json({ error: 'improper url format' });
+        console.log('longurl = ' + longurl);
+    }
+    else {
+        Url.count({}, function(err, item) {
+            var count = item;
+            console.log(count + ' items inside');
 
-        var newurl = new Url({
-            id: count,
-            longurl: longurl
+            var newurl = new Url({
+                id: count,
+                longurl: longurl
+            });
+
+            newurl.save(function(err) {
+                if(err) {
+                    console.log('error');
+                }
+                else {
+                    console.log('success!');
+                }
+            });
+
+            // for development on localhost:port
+            //res.json({ longurl: longurl, shorturl: req.hostname + ':' + port + '/' + count });
+
+            // for deployment
+            res.json({ longurl: longurl, shorturl: req.hostname + '/' + count });
+
         });
-
-        newurl.save(function(err) {
-            if(err) {
-                console.log('error');
-            }
-            else {
-                console.log('success!');
-            }
-        });
-
-        // for development on localhost:port
-        //res.json({ longurl: longurl, shorturl: req.hostname + ':' + port + '/' + count });
-        
-        // for deployment
-        res.json({ longurl: longurl, shorturl: req.hostname + '/' + count });
-        
-    });
+    }
 });
 
 app.get('/:id', function(req, res) {
