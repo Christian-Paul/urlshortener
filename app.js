@@ -5,8 +5,18 @@ var mongoose = require('mongoose');
 app.enable('trust proxy');
 var port = process.env.PORT || 3000;
 
-// mongoose initialization
-mongoose.connect('mongodb://christ:please@ds064748.mlab.com:64748/addressbook');
+// get credentials from config file in dev, or from heroku env in deployment
+if(port === 3000) {
+    var config = require('./config.js');
+} else {
+    var config = {
+        mongooseUsername: process.env.mongooseUsername,
+        mongoosePassword: process.env.mongoosePassword
+    };
+}
+
+// mongoose mlab initialization
+mongoose.connect('mongodb://' + config.mongooseUsername + ':' + config.mongoosePassword + '@ds064748.mlab.com:64748/addressbook');
 var db = mongoose.connection;
 var urlSchema = new mongoose.Schema({
     id: Number,
